@@ -1,247 +1,331 @@
 cl = console.log;
-const showMovieBtn = document.getElementById("showMovieBtn");
-const backDrop = document.getElementById("backDrop");
-const moviemodel = document.getElementById("moviemodel");
-const closeToggle = [...document.querySelectorAll(".closeToggle")];
-const movieForm = document.getElementById("movieForm");
-const movieTitlecontrol = document.getElementById("movieTitle");
-const movieURLcontrol = document.getElementById("movieURL");
-const overviewcontrol = document.getElementById("overview");
-const ratingcontrol = document.getElementById("rating");
-const movieContainer = document.getElementById("movieContainer");
-const sumbitbtn = document.getElementById("sumbitbtn");
-const updateBtn = document.getElementById("updateBtn");
 
-let movieArr = [];
+const SearchBar = document.getElementById("SearchBar");
+const cardInfo = document.getElementById("cardInfo");
 
-uuid = () => {
-  return String("xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx").replace(
-    /[xy]/g,
-    (character) => {
-      const random = (Math.random() * 16) | 0;
-      const value = character === "x" ? random : (random & 0x3) | 0x8;
+const NameBtn = document.getElementById("NameBtn");
+const CapitalBtn = document.getElementById("CapitalBtn");
+const PopulationBtn = document.getElementById("PopulationBtn");
 
-      return value.toString(16);
-    }
-  );
-};
+const nameIcon = document.getElementById("nameIcon");
+const capitalIcon = document.getElementById("capitalIcon");
+const popIcon = document.getElementById("popIcon");
 
-let editId;
-const onEdit = (ele) => {
-  movieModelhandler();
-  editId = ele.closest(".card").id;
-  let editObj = movieArr.find((ele) => ele.movieId === editId);
+const Graphdata = document.getElementById("graph");
 
-  movieTitlecontrol.value = editObj.movieTitle;
-  movieURLcontrol.value = editObj.movieURL;
-  overviewcontrol.value = editObj.overview;
-  ratingcontrol.value = editObj.rating;
+const CardTemplating = (array = countries) => {
+  let result = "";
 
-  updateBtn.classList.remove("d-none");
-  sumbitbtn.classList.add("d-none");
-};
-
-const onRemove = (ele) => {
-  Swal.fire({
-    title: "Are you sure?",
-    text: "You won't be able to revert this!",
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#3085d6",
-    cancelButtonColor: "#d33",
-    confirmButtonText: "Yes, delete it!",
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const removeId = ele.closest(".card").id;
-      const indexToRemove = movieArr.findIndex(
-        (ele) => ele.movieId === removeId
-      );
-      movieArr.splice(indexToRemove, 1);
-
-      ele.closest(".col-md-6").remove();
-    }
+  array.forEach((ele) => {
+    result += ` <div class="col-lg-2 mt-3">
+          <div class="card countryflag" >
+          <img
+            src="${ele.flag}"
+            class="card-img-top"
+            alt="flag"
+            title="flag"
+          />
+          <div class="card-body cardInfocontainerheight">
+            <h5 class="card-title Ctitle">${ele.name}</h5>
+            <p class="card-text">
+              <p class="mb-0"><span class="font-weight-bold">Capital: </span>${ele.capital}</p>
+              <p class="mb-0"><span class="font-weight-bold">Languages: </span>${ele.languages}</p>
+              <p class="mb-0"><span class="font-weight-bold">Population: </span>${ele.population}</p>
+            </p>
+          </div>
+        </div>
+      </div>`;
   });
+
+  cardInfo.innerHTML = result;
 };
 
-const createMovieCards = (arr) => {
-  let movieCardResult = "";
-  arr.forEach((movie) => {
-    // console.log(movie);
-    movieCardResult += `
-                        <div class="col-md-6 col-lg-3 mb-4 cardbg">
-                            <div class="card" id=${movie.movieId}>
-                                <div class="card-header cardbg">
-                                    <h4 class="mb-0">${movie.movieTitle}</h4>
-                                </div>
-                                <div class="card-body cardbg">
-                                    <figure class="movieCard">
-                                        <img
-                                        src="${movie.movieURL}"
-                                        alt="${movie.movieTitle}"
-                                        title="${movie.movieTitle}"
-                                        />
-                                        <figcaption>
-                                            <div class="movieTitle">
-                                                <div class="row">
-                                                    <div class="col-10">
-                                                        <h4 class="m-0">
-                                                            ${movie.movieTitle}
-                                                        </h4>
-                                                    </div>
-                                                    <div class="col-2 rating text-center">
-                                                        <span
-                                                            class="${setClassRating(
-                                                              movie.rating
-                                                            )}">${movie.rating}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="movieOverview">
-                                                <h4 class="mb-0">${
-                                                  movie.movieTitle
-                                                }</h4>
-                                                <h4>
-                                                    <em>Overview</em>
-                                                </h4>
-                                                <p class="m-0 mt-2">
-                                                    ${movie.overview}
-                                                </p>
-                                            </div>
-                                        </figcaption>
-                                    </figure>
-                                </div>
-                                <div class="card-footer d-flex justify-content-between cardbg">
-                                    <button class="btn btn-sm edit-bg" onclick="onEdit(this)">Edit</button>
-                                    <button class="btn btn-sm edit-bg" onclick="onRemove(this)">Remove</button>
-                                </div>
-                            </div>
-                        </div>
-                        `;
+CardTemplating();
+
+const onClickSearchname = (eve) => {
+  let Searchword = eve.target.value.toLowerCase();
+
+  let filtercountries = countries.filter((ele) => {
+    return (
+      ele.name.toLowerCase().includes(Searchword) ||
+      (ele.capital && ele.capital.toLowerCase().includes(Searchword)) ||
+      ele.languages.some((lang) => lang.toLowerCase().includes(Searchword))
+    );
   });
-  movieContainer.innerHTML = movieCardResult;
-};
-createMovieCards(movieArr);
 
-const creeateele = (newMovieObj) => {
-  let cardDiv = document.createElement("div");
-  cardDiv.className = `col-md-6 col-lg-3 mb-4 cardbg`;
-  cardDiv.innerHTML = `<div class="card" id=${newMovieObj.movieId}>
-                                <div class="card-header cardbg">
-                                    <h4 class="mb-0">${
-                                      newMovieObj.movieTitle
-                                    }</h4>
-                                </div>
-                                <div class="card-body cardbg">
-                                    <figure class="movieCard">
-                                        <img
-                                        src="${newMovieObj.movieURL}"
-                                        alt="${newMovieObj.movieTitle}"
-                                        title="${newMovieObj.movieTitle}"
-                                        />
-                                        <figcaption>
-                                            <div class="movieTitle">
-                                                <div class="row">
-                                                    <div class="col-10">
-                                                        <h4 class="m-0">
-                                                            ${
-                                                              newMovieObj.movieTitle
-                                                            }
-                                                        </h4>
-                                                    </div>
-                                                    <div class="col-2 rating text-center">
-                                                        <span
-                                                            class="${setClassRating(
-                                                              newMovieObj.rating
-                                                            )}">${
-    newMovieObj.rating
-  }
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="movieOverview">
-                                                <h4 class="mb-0">${
-                                                  newMovieObj.movieTitle
-                                                }</h4>
-                                                <h4>
-                                                    <em>Overview</em>
-                                                </h4>
-                                                <p class="m-0 mt-2">
-                                                    ${newMovieObj.overview}
-                                                </p>
-                                            </div>
-                                        </figcaption>
-                                    </figure>
-                                </div>
-                                <div class="card-footer d-flex justify-content-between cardbg">
-                                    <button class="btn btn-sm edit-bg" onclick="onEdit(this)">Edit</button>
-                                    <button class="btn btn-sm edit-bg" onclick="onRemove(this)">Remove</button>
-                                </div>
-                            </div>`;
-
-  movieContainer.prepend(cardDiv);
+  CardTemplating(filtercountries);
 };
 
-const movieModelhandler = () => {
-  movieForm.reset();
-  backDrop.classList.toggle("active");
-  moviemodel.classList.toggle("active");
-};
+const onNameClick = () => {
+  nameIcon.classList.remove("d-none");
+  capitalIcon.classList.add("d-none");
+  popIcon.classList.add("d-none");
 
-const getdataForm = (eve) => {
-  eve.preventDefault();
-  let newMovieObj = {
-    movieTitle: movieTitlecontrol.value,
-    movieURL: movieURLcontrol.value,
-    overview: overviewcontrol.value,
-    rating: ratingcontrol.value,
-    movieId: uuid(),
-  };
-  movieArr.unshift(newMovieObj);
-  eve.target.reset();
-  creeateele(newMovieObj);
-  movieModelhandler();
+  if (nameIcon.className.includes("fa-arrow-down")) {
+    nameIcon.classList.remove("fa-arrow-down");
+    nameIcon.classList.add("fa-arrow-up");
 
-  Swal.fire({
-    position: "center",
-    icon: "success",
-    title: `new movie ${newMovieObj.movieTitle} added`,
-    timer: 2500,
-  });
-};
-
-const onupdateBtn = () => {
-  let updatedMovie = {
-    movieTitle: movieTitlecontrol.value,
-    movieURL: movieURLcontrol.value,
-    overview: overviewcontrol.value,
-    rating: ratingcontrol.value,
-    movieId: editId,
-  };
-
-  updateBtn.classList.add("d-none");
-  sumbitbtn.classList.remove("d-none");
-  const updateIndex = movieArr.findIndex((ele) => ele.movieId === editId);
-  movieArr[updateIndex] = updatedMovie;
-  createMovieCards(movieArr);
-  movieModelhandler();
-};
-
-showMovieBtn.addEventListener("click", movieModelhandler);
-closeToggle.forEach((ele) => {
-  ele.addEventListener("click", movieModelhandler);
-});
-
-movieForm.addEventListener("submit", getdataForm);
-updateBtn.addEventListener("click", onupdateBtn);
-
-function setClassRating(rating) {
-  if (rating <= 2) {
-    return "bg-danger";
-  } else if (rating > 3 && rating < 4) {
-    return "bg-warning";
+    countries.sort((a, b) => b.name.localeCompare(a.name));
   } else {
-    return "bg-success";
+    nameIcon.classList.add("fa-arrow-down");
+    nameIcon.classList.remove("fa-arrow-up");
+
+    countries.sort((a, b) => a.name.localeCompare(b.name));
   }
-}
+
+  CardTemplating();
+};
+
+const OnCapitalBtnClick = () => {
+  nameIcon.classList.add("d-none");
+  capitalIcon.classList.remove("d-none");
+  popIcon.classList.add("d-none");
+
+  if (capitalIcon.className.includes("fa-arrow-down")) {
+    capitalIcon.classList.remove("fa-arrow-down");
+    capitalIcon.classList.add("fa-arrow-up");
+
+    countries.sort((a, b) => {
+      a.capital = a.capital || "unknown";
+      b.capital = b.capital || "unknown";
+
+      return b.capital.localeCompare(a.capital);
+    });
+  } else {
+    capitalIcon.classList.add("fa-arrow-down");
+    capitalIcon.classList.remove("fa-arrow-up");
+
+    countries.sort((a, b) => {
+      a.capital = a.capital || "unknown";
+      b.capital = b.capital || "unknown";
+
+      return a.capital.localeCompare(b.capital);
+    });
+  }
+
+  CardTemplating();
+};
+
+const OnclickPop = () => {
+  nameIcon.classList.add("d-none");
+  capitalIcon.classList.add("d-none");
+  popIcon.classList.remove("d-none");
+
+  if (popIcon.className.includes("fa-arrow-down")) {
+    popIcon.classList.remove("fa-arrow-down");
+    popIcon.classList.add("fa-arrow-up");
+
+    countries.sort((a, b) => b.population - a.population);
+  } else {
+    popIcon.classList.add("fa-arrow-down");
+    popIcon.classList.remove("fa-arrow-up");
+
+    countries.sort((a, b) => a.population - b.population);
+  }
+
+  CardTemplating();
+};
+
+const graphTemplating = () => {
+  let totalpopulation = countries.reduce((acc, cv) => {
+    acc += cv.population;
+    return acc;
+  }, 0);
+
+  let top10populatedcounty = countries
+    .sort((a, b) => b.population - a.population)
+    .slice(0, 10);
+
+  cl(top10populatedcounty);
+};
+
+graphTemplating();
+const cl = console.log;
+
+const cardInfo = document.getElementById("cardInfo");
+
+const BtnName = document.getElementById("btnName");
+const btnCap = document.getElementById("btnCap");
+const btnPop = document.getElementById("btnPop");
+
+const iconN = document.querySelector("#btnName i");
+const iconC = document.querySelector("#btnCap i");
+const iconP = document.querySelector("#btnPop i");
+
+const onSearch = document.getElementById("search");
+
+const commentAdd = document.getElementById("comment");
+
+const dataContainer = document.getElementById("dataContainer");
+
+const Populationbtn = document.getElementById("Populationbtn");
+
+const languagesbtn = document.getElementById("languagesbtn");
+
+const CardTemplate = (array = countries) => {
+  let result = "";
+  array.forEach((ele) => {
+    result += ` <div class="col-lg-2">
+                    <div class="card country">
+                    <img
+                        src="${ele.flag}"
+                        class="card-img-top shadow"
+                        alt="Flag"
+                        title="Flag"
+                    />
+                    <div class="card-body">
+                        <h5 class="card-title text-center">${ele.name}</h5>
+                        <div class="card-text">
+                        <p class=" mb-0"><span class="font-weight-bold">Capital: </span>${ele.capital}</p>
+                        <p class=" mb-0"><span class="font-weight-bold">Languages: </span>${ele.languages}</p>
+                        <p class=" mb-0"><span class="font-weight-bold">Population: </span>${ele.population}</p>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+          `;
+  });
+
+  cardInfo.innerHTML = result;
+};
+
+CardTemplate();
+
+const onClickSearch = (eve) => {
+  let searchWord = eve.target.value.toLowerCase();
+  let filteredCountries = countries.filter((ele) => {
+    return (
+      ele.name.toLowerCase().includes(searchWord) ||
+      (ele.capital && ele.capital.toLowerCase().includes(searchWord)) ||
+      ele.languages.some((lang) => lang.toLowerCase().includes(searchWord))
+    );
+  });
+  CardTemplate(filteredCountries);
+
+  commentAdd.innerHTML = `${filteredCountries.length} out of ${countries.length} countries`;
+};
+
+const OnClickSortName = () => {
+  iconN.classList.remove("d-none");
+  iconC.classList.add("d-none");
+  iconP.classList.add("d-none");
+
+  if (iconN.classList.contains("fa-arrow-down-long")) {
+    iconN.classList.remove("fa-arrow-down-long");
+    iconN.classList.add("fa-arrow-up-long");
+    countries.sort((a, b) => b.name.localeCompare(a.name));
+  } else {
+    iconN.classList.add("fa-arrow-down-long");
+    iconN.classList.remove("fa-arrow-up-long");
+    countries.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  CardTemplate();
+};
+
+const onCapButtonClick = () => {
+  iconN.classList.add("d-none");
+  iconC.classList.remove("d-none");
+  iconP.classList.add("d-none");
+
+  if (iconC.classList.contains("fa-arrow-down-long")) {
+    iconC.classList.remove("fa-arrow-down-long");
+    iconC.classList.add("fa-arrow-up-long");
+    countries.sort((a, b) => {
+      a.capital = a.capital || "Unknown";
+      b.capital = b.capital || "Unknown";
+
+      return b.capital.localeCompare(a.capital);
+    });
+  } else {
+    iconC.classList.add("fa-arrow-down-long");
+    iconC.classList.remove("fa-arrow-up-long");
+    countries.sort((a, b) => {
+      a.capital = a.capital || "Unknown";
+      b.capital = b.capital || "Unknown";
+
+      return a.capital.localeCompare(b.capital);
+    });
+  }
+
+  CardTemplate();
+};
+
+const onClickPopulation = () => {
+  iconN.classList.add("d-none");
+  iconC.classList.add("d-none");
+  iconP.classList.remove("d-none");
+
+  if (iconP.classList.contains("fa-arrow-down-long")) {
+    iconP.classList.remove("fa-arrow-down-long");
+    iconP.classList.add("fa-arrow-up-long");
+    countries.sort((a, b) => b.population - a.population);
+  } else {
+    iconP.classList.add("fa-arrow-down-long");
+    iconP.classList.remove("fa-arrow-up-long");
+    countries.sort((a, b) => a.population - b.population);
+  }
+
+  CardTemplate();
+};
+
+const displayGraphTemplate = () => {
+  let totalWorldPopulation = countries.reduce((acc, cv) => {
+    acc += cv.population;
+
+    return acc;
+  }, 0);
+  // const worldPop = countries.reduce((acc, cv) => acc + cv.population, 0);
+
+  let sort10populatedcounty = countries
+    .sort((a, b) => b.population - a.population)
+    .slice(0, 10);
+
+  result = `<div class="row">
+          <div class="col-md-2"><h5>World</h5></div>
+          <div class="col-md-8">
+            <div class="graphbar">
+              <h5><div class="percent" style="width: 100%"></div></h5>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <h5 class="countPopulation">${totalWorldPopulation}</h5>
+          </div>
+        </div>`;
+
+  sort10populatedcounty.forEach((country) => {
+    result += `<div class="row">
+          <div class="col-md-2"><h5>${country.name}</h5></div>
+          <div class="col-md-8">
+            <div class="graphbar">
+              <h5><div class="percent" style="width:${
+                (country.population / totalWorldPopulation) * 100
+              }%"></div></h5>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <h5 class="countPopulation">${country.population}</h5>
+          </div>
+        </div>`;
+  });
+
+  dataContainer.innerHTML = result;
+};
+
+displayGraphTemplate();
+
+const onClickshowpopGraph = () => {
+  displayGraphTemplate();
+};
+// ----------------------------------------------graph langauge-------------
+
+onSearch.addEventListener("keyup", onClickSearch);
+BtnName.addEventListener("click", OnClickSortName);
+btnCap.addEventListener("click", onCapButtonClick);
+btnPop.addEventListener("click", onClickPopulation);
+Populationbtn.addEventListener("click", onClickshowpopGraph);
+
+SearchBar.addEventListener("keyup", onClickSearchname);
+NameBtn.addEventListener("click", onNameClick);
+CapitalBtn.addEventListener("click", OnCapitalBtnClick);
+PopulationBtn.addEventListener("click", OnclickPop);
